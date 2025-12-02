@@ -5,10 +5,193 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free Movies This Month</title>
     <link rel="stylesheet" th:href="@{/css/movies.css}">
+    <style>
+        /* Pirate-themed search form styles */
+        .search-container {
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            border: 3px solid #654321;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .search-title {
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .search-field {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .search-field label {
+            color: #FFD700;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        
+        .search-field input {
+            padding: 8px 12px;
+            border: 2px solid #654321;
+            border-radius: 8px;
+            font-size: 1em;
+            background-color: #FFF8DC;
+        }
+        
+        .search-field input:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        
+        .search-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .search-btn, .clear-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .search-btn {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #8B4513;
+        }
+        
+        .search-btn:hover {
+            background: linear-gradient(135deg, #FFA500, #FFD700);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .clear-btn {
+            background: linear-gradient(135deg, #DC143C, #B22222);
+            color: white;
+        }
+        
+        .clear-btn:hover {
+            background: linear-gradient(135deg, #B22222, #DC143C);
+            transform: translateY(-2px);
+        }
+        
+        .search-message {
+            text-align: center;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        
+        .search-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .search-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .results-count {
+            font-weight: bold;
+            color: #8B4513;
+        }
+        
+        .back-to-all {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-all:hover {
+            background: linear-gradient(135deg, #495057, #6c757d);
+            transform: translateY(-1px);
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Free Movies This Month</h1>
+        
+        <!-- Pirate-themed Search Form -->
+        <div class="search-container">
+            <h2 class="search-title">🏴‍☠️ Search the Treasure Chest of Movies! ⚓</h2>
+            <form class="search-form" th:action="@{/movies/search/form}" method="get">
+                <div class="search-field">
+                    <label for="name">Movie Name (Arrr!):</label>
+                    <input type="text" id="name" name="name" 
+                           th:value="${searchName}" 
+                           placeholder="Enter movie name, ye scallywag...">
+                </div>
+                
+                <div class="search-field">
+                    <label for="id">Movie ID (Shiver me timbers!):</label>
+                    <input type="number" id="id" name="id" 
+                           th:value="${searchId}" 
+                           placeholder="Enter movie ID, matey...">
+                </div>
+                
+                <div class="search-field">
+                    <label for="genre">Genre (Yo ho ho!):</label>
+                    <input type="text" id="genre" name="genre" 
+                           th:value="${searchGenre}" 
+                           placeholder="Enter genre, landlubber...">
+                </div>
+                
+                <div class="search-buttons">
+                    <button type="submit" class="search-btn">🔍 Search for Treasure!</button>
+                    <a href="/movies" class="clear-btn">🧹 Clear Search</a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Search Messages -->
+        <div th:if="${searchMessage}" class="search-message success" th:text="${searchMessage}"></div>
+        <div th:if="${searchError}" class="search-message error" th:text="${searchError}"></div>
+        
+        <!-- Results Header -->
+        <div th:if="${isSearchResult}" class="results-header">
+            <span class="results-count" th:text="'Showing ' + ${totalResults} + ' search results'">Showing search results</span>
+            <a href="/movies" class="back-to-all">⚓ Back to All Movies</a>
+        </div>
+        
+        <!-- Movies Grid -->
         <div class="movies-grid">
             <div class="movie-card" th:each="movie : ${movies}">
                 <div class="movie-icon" th:text="${movie.icon}">🎬</div>
@@ -28,6 +211,12 @@
                 </div>
                 <a th:href="@{/movies/{id}/details(id=${movie.id})}" class="details-btn">View Details</a>
             </div>
+        </div>
+        
+        <!-- Empty Results Message -->
+        <div th:if="${movies.empty}" class="search-message error">
+            <p>🏴‍☠️ Blimey! No movies found in our treasure chest!</p>
+            <p>Try searching with different terms, ye landlubber!</p>
         </div>
     </div>
 </body>
